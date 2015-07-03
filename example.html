@@ -1,0 +1,85 @@
+<html>
+	<head>
+		<title>vsop87.js example</title>
+		<script src="vsop87.js" type="text/javascript"></script>
+	</head>
+	<body>
+		<h1>vsop87.js example</h1>
+		
+		<p>
+			This example calculates the position of Earth in a Heliocentric coordinate system, where the Sun is at [ 0, 0, 0 ], the units are in AU (Astronomical Unit, 149 597 871 kilometers). The datafiles includes series for the other Planets as well, you just need to change the parameter for vsop87_get_file().
+		</p>
+		
+		<p>
+			The vsop87.js library is based on the <a href="https://en.wikipedia.org/wiki/VSOP_(planets)">VSOP87 theorem</a> and the calculations from <a href="http://www.caglow.com/info/compute/vsop87">Planetary Positions with VSOP87</a>. The VSOP87 datafiles were downloaded from <a href="ftp://cdsarc.u-strasbg.fr/pub/cats/VI%2F81/">ftp://cdsarc.u-strasbg.fr/pub/cats/VI%2F81/</a>.
+		</p>
+		
+		<div id="position"></div>
+		
+		<p>
+			See on GitHub: <a href="https://github.com/gheja/misc/vsop87.js/">https://github.com/gheja/misc/vsop87.js/</a>
+		</p>
+		
+		<script type="text/javascript">
+			var coeffs_earth, pos_earth, now, div_object;
+			
+			function initialize()
+			{
+				// load the coefficients
+				coeffs_earth = vsop87_parse_file(vsop87_get_file('datafiles/VSOP87C.ear'));
+				
+				// find the div where we will put the coordinates
+				div_object = document.getElementById('position');
+				
+				// run update() at 15 frames per second
+				window.setInterval(update, 1000 / 15);
+			}
+			
+			function zeropad(n, zeroes)
+			{
+				var result;
+				
+				result = String(n);
+				
+				while (result.length < zeroes)
+				{
+					result = "0" + result;
+				}
+				
+				return result;
+			}
+			
+			function get_formatted_date(datetime)
+			{
+				return datetime.getUTCFullYear() + "-" + 
+					zeropad(datetime.getUTCMonth()+1, 2) + "-" + 
+					zeropad(datetime.getUTCDate(), 2) + " " + 
+					zeropad(datetime.getUTCHours(), 2) + ":" + 
+					zeropad(datetime.getUTCMinutes(), 2) + ":" + 
+					zeropad(datetime.getUTCSeconds(), 2) + "." + 
+					zeropad(datetime.getUTCMilliseconds(), 3) + " UTC";
+			}
+			
+			function update()
+			{
+				var result;
+				
+				now = new Date();
+				pos_earth = vsop87_get_position(coeffs_earth, now);
+				
+				result = "";
+				result = result + "<b>Time</b><br/>";
+				result = result + get_formatted_date(now) + "<br/>";
+				result = result + "<br/>";
+				result = result + "<b>Earth</b><br/>";
+				result = result + "X: " + pos_earth.x.toFixed(10) + " AU<br/>";
+				result = result + "Y: " + pos_earth.y.toFixed(10) + " AU<br/>";
+				result = result + "Z: " + pos_earth.z.toFixed(10) + " AU<br/>";
+				
+				div_object.innerHTML = result;
+			}
+			
+			window.onload = initialize;
+		</script>
+	</body>
+</html>
